@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwritten Table Scanner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/tesseract.js@v4.0.1/dist/tesseract.min.js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Escáner de Tablas a Mano</h1>
+
+        <div class="mb-8">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Define los encabezados de tu tabla:</label>
+            <div id="headers-container" class="flex flex-wrap gap-2 mb-4">
+                <input type="text" placeholder="Ej: Fecha"
+                    class="header-input border p-2 rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <button id="add-header"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm transition-all">
+                + Agregar Columna
+            </button>
+        </div>
+
+        <hr class="my-6">
+
+        <div class="flex flex-col items-center">
+            <video id="video" class="w-full max-w-md bg-black rounded-lg hidden" autoplay playsinline></video>
+            <canvas id="canvas" class="hidden"></canvas>
+
+            <div class="flex gap-4 mt-4">
+                <button id="start-camera" class="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold">Abrir
+                    Cámara</button>
+                <button id="snap" class="bg-red-500 text-white px-6 py-2 rounded-lg font-semibold hidden">Tomar
+                    Foto</button>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden mt-8 text-center text-blue-600 font-bold animate-pulse">
+            Procesando imagen con IA... (Esto puede tardar unos segundos)
+        </div>
+
+        <div id="result-area" class="mt-8 overflow-x-auto hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-700">Datos Extraídos:</h2>
+                <button id="export-csv"
+                    class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors">
+                    <span>📊</span> Exportar a Excel (CSV)
+                </button>
+            </div>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead id="table-head" class="bg-gray-200"></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
