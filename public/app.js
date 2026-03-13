@@ -5,6 +5,7 @@ const startCamera = document.getElementById('start-camera');
 const headersContainer = document.getElementById('headers-container');
 const addHeaderBtn = document.getElementById('add-header');
 const loading = document.getElementById('loading');
+const fileInput = document.getElementById('file-input');
 
 // 1. Agregar más inputs de encabezados
 addHeaderBtn.addEventListener('click', () => {
@@ -139,4 +140,34 @@ document.getElementById('export-csv').addEventListener('click', () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+});
+
+// 5. Lógica para subir archivo desde galería
+fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        const img = new Image();
+        img.onload = function () {
+            // Ajustamos el canvas al tamaño de la imagen subida
+            const context = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            context.drawImage(img, 0, 0);
+
+            // Detenemos la cámara si estaba encendida
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.classList.add('hidden');
+                snap.classList.add('hidden');
+            }
+
+            // Procesamos la imagen igual que si fuera una foto tomada
+            processImage();
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
 });
