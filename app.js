@@ -48,8 +48,7 @@ async function processImage() {
     const imageData = canvas.toDataURL('image/jpeg', 0.8);
 
     try {
-        // CAMBIA ESTO por la URL que te dé Railway al desplegar
-        const API_URL = 'https://tu-proyecto-production.up.railway.app/api/scan';
+        const API_URL = '/api/scan'; // Así funcionará tanto local como en Railway
 
         const response = await fetch(API_URL, {
             method: 'POST',
