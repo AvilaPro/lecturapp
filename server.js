@@ -22,17 +22,22 @@ app.post('/api/scan', async (req, res) => {
         const response = await axios.post(
             `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_API_KEY}`,
             {
-                requests: [
-                    {
-                        image: { content: image.split(',')[1] },
-                        features: [{ type: 'DOCUMENT_TEXT_DETECTION' }]
-                    }
-                ]
+                requests: [{
+                    image: { content: image.split(',')[1] },
+                    features: [{ type: 'DOCUMENT_TEXT_DETECTION' }]
+                }]
             }
         );
         res.json(response.data);
     } catch (error) {
-        res.status(500).send('Error en el servidor');
+        // Esto imprimirá el error real en los logs de Railway
+        console.error("DETALLE DEL ERROR:", error.response ? error.response.data : error.message);
+
+        // Enviamos el detalle al frontend para saber qué pasa mientras pruebas
+        res.status(500).json({
+            error: 'Fallo en Google Vision',
+            detalle: error.response ? error.response.data : error.message
+        });
     }
 });
 

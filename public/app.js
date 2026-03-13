@@ -56,6 +56,14 @@ async function processImage() {
             body: JSON.stringify({ image: imageData })
         });
 
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Error del servidor:", errorData);
+            alert(`Error: ${errorData.detalle || 'Error desconocido'}`);
+            loading.classList.add('hidden');
+            return;
+        }
+
         const data = await response.json();
         const fullTextAnnotation = data.responses[0].fullTextAnnotation;
 
