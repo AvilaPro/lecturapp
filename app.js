@@ -45,47 +45,65 @@ snap.addEventListener('click', () => {
 
 async function processImage() {
     loading.classList.remove('hidden');
-    const imageData = canvas.toDataURL('image/png');
+    const imageData = canvas.toDataURL('image/jpeg', 0.8);
 
-    // Tesseract.js reconoce el texto
-    const result = await Tesseract.recognize(imageData, 'spa', {
-        logger: m => console.log(m)
-    });
+    try {
+        // CAMBIA ESTO por la URL que te dé Railway al desplegar
+        const API_URL = 'https://tu-proyecto-production.up.railway.app/api/scan';
 
-    displayResults(result.data.lines);
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imageData })
+        });
+
+        const data = await response.json();
+        const fullTextAnnotation = data.responses[0].fullTextAnnotation;
+
+        if (fullTextAnnotation) {
+            displayResultsFromVision(fullTextAnnotation);
+        } else {
+            alert("No se detectó texto en la imagen.");
+            loading.classList.add('hidden');
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Error al conectar con el servidor.");
+        loading.classList.add('hidden');
+    }
 }
 
-function displayResults(lines) {
+function displayResultsFromVision(annotation) {
     loading.classList.add('hidden');
-    const resultArea = document.getElementById('result-area');
-    const tableHead = document.getElementById('table-head');
     const tableBody = document.getElementById('table-body');
-
     const headers = Array.from(document.querySelectorAll('.header-input'))
         .map(input => input.value || "Columna");
 
-    tableHead.innerHTML = `<tr>${headers.map(h => `<th class="border p-2 bg-gray-200">${h}</th>`).join('')}</tr>`;
     tableBody.innerHTML = '';
 
-    lines.forEach(line => {
-        // Limpiamos el texto de caracteres extraños comunes en OCR
-        const cleanText = line.text.replace(/[|] /g, "").trim();
-        const words = cleanText.split(/\s{2,}/); // Dividir por 2 o más espacios (mejor para tablas)
-
-        if (words.length > 0) {
+    // Google Vision organiza por bloques y párrafos
+    // Aquí tomamos cada bloque de texto como una fila potencial o procesamos líneas
+    annotation.pages[0].blocks.forEach(block => {
+        block.paragraphs.forEach(para => {
             const row = document.createElement('tr');
+            const paraText = para.words.map(w => w.symbols.map(s => s.text).join('')).join(' ');
+
+            // Lógica simple: dividir el texto del párrafo por espacios para llenar columnas
+            const words = paraText.split(/\s+/);
+
             headers.forEach((_, index) => {
                 const td = document.createElement('td');
                 td.className = "border p-2 text-sm outline-none focus:bg-yellow-50";
-                td.contentEditable = "true"; // ¡Permite al usuario corregir errores del OCR!
+                td.contentEditable = "true";
                 td.innerText = words[index] || "";
                 row.appendChild(td);
             });
             tableBody.appendChild(row);
-        }
+        });
     });
 
-    resultArea.classList.remove('hidden');
+    document.getElementById('result-area').classList.remove('hidden');
 }
 
 // 4. Función para Exportar a CSV
