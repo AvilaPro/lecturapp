@@ -38,7 +38,8 @@ app.post('/api/scan', async (req, res) => {
 
 // Ruta para que cualquier otra petición cargue el index.html
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    res.sendFile(indexPath);
 });
 
 app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
